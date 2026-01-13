@@ -1,81 +1,140 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Optimizador de Corte</title>
-<style>
-body{
-  font-family: Arial;
-  background:white;
-  color:black;
-  padding:20px;
-}
-.logo-container {
-  text-align: center;
-  margin-bottom: 20px;
-}
-.logo-container img {
-  max-width: 250px;
-  height: auto;
-}
-.section {
-  margin-bottom:12px;
-}
-label{
-  display:inline-block;
-  width:90px;
-}
-input, select, button{
-  padding:6px;
-  margin:4px;
-}
-canvas{
-  border:1px solid black;
-  margin-top:20px;
-  background-color: white;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimizador de Corte</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            padding: 10px;
+            margin: 0;
+        }
+        .logo-container {
+            text-align: center;
+            margin-bottom: 15px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .logo-container img {
+            max-width: 180px; /* Reducido para móvil */
+            height: auto;
+        }
+        .section {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        b { display: block; margin-bottom: 8px; color: #555; }
+        
+        /* Ajuste de inputs para que no se amontonen */
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        label {
+            flex: 0 0 80px; /* Ancho fijo para etiquetas */
+            font-size: 14px;
+        }
+        input, select {
+            flex: 1; /* El input toma el resto del espacio */
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px; /* Evita el zoom automático en iPhone */
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        button {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-calc { background: #4CAF50; color: white; }
+        .btn-down { background: #2196F3; color: white; }
+        
+        #info {
+            font-weight: bold;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        /* Canvas responsivo */
+        .canvas-container {
+            width: 100%;
+            overflow-x: auto; /* Permite scroll horizontal si el dibujo es grande */
+            background: white;
+            border-radius: 8px;
+        }
+        canvas {
+            border: 1px solid #000;
+            display: block;
+            margin: 0 auto;
+            max-width: 100%; /* No se sale de la pantalla */
+            height: auto;   /* Mantiene proporción */
+        }
+    </style>
 </head>
 <body>
 
 <div class="logo-container">
-    <a href="https://postimg.cc/f3gbb58P" target="_blank">
-        <img id="logoImg" src="https://i.postimg.cc/1tyVJjwy/Logo_Blanco_violeta.png" alt="Logo_Blanco_violeta" crossorigin="anonymous">
-    </a>
+    <img id="logoImg" src="https://i.postimg.cc/1tyVJjwy/Logo_Blanco_violeta.png" alt="Logo" crossorigin="anonymous">
 </div>
 
 <div class="section">
-<b>Unidad</b>
-<select id="unit">
-<option value="1">mm</option>
-<option value="10">cm</option>
-<option value="1000">m</option>
-</select>
+    <b>Configuración</b>
+    <div class="input-group">
+        <label>Unidad</label>
+        <select id="unit">
+            <option value="1">mm</option>
+            <option value="10" selected>cm</option>
+            <option value="1000">m</option>
+        </select>
+    </div>
 </div>
 
 <div class="section">
-<b>Tabla</b><br>
-<label>Ancho</label><input id="bw">
-<label>Alto</label><input id="bh">
+    <b>Tabla Base</b>
+    <div class="input-group"><label>Ancho</label><input type="number" id="bw" placeholder="0"></div>
+    <div class="input-group"><label>Alto</label><input type="number" id="bh" placeholder="0"></div>
 </div>
 
 <div class="section">
-<b>Cortes</b><br>
-<label>Ancho</label><input id="cw">
-<label>Alto</label><input id="ch">
-<label>Cantidad</label><input id="qty">
+    <b>Piezas a Cortar</b>
+    <div class="input-group"><label>Ancho</label><input type="number" id="cw" placeholder="0"></div>
+    <div class="input-group"><label>Alto</label><input type="number" id="ch" placeholder="0"></div>
+    <div class="input-group"><label>Cantidad</label><input type="number" id="qty" placeholder="0"></div>
 </div>
 
 <div class="section">
-<b>Disco</b><br>
-<label>Grosor (mm)</label><input id="kerf">
+    <b>Sierra (Disco)</b>
+    <div class="input-group"><label>Grosor mm</label><input type="number" id="kerf" value="0"></div>
 </div>
 
-<button onclick="draw()">Calcular</button>
-<button onclick="download()">Descargar</button>
+<div class="buttons">
+    <button class="btn-calc" onclick="draw()">Calcular</button>
+    <button class="btn-down" onclick="download()">Descargar</button>
+</div>
 
 <div id="info"></div>
-<canvas id="cv" width="1400" height="600"></canvas>
+
+<div class="canvas-container">
+    <canvas id="cv" width="800" height="600"></canvas>
+</div>
 
 <script>
 function v(id){
@@ -95,18 +154,19 @@ function draw(){
   let kerf=v("kerf");
 
   if(bw<=0||bh<=0||cw<=0||ch<=0||qty<=0){
-    alert("Faltan datos");
+    alert("Por favor completa los datos");
     return;
   }
 
   const c=document.getElementById("cv");
   const ctx=c.getContext("2d");
 
+  // Ajustar tamaño del canvas internamente para mejor resolución
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, c.width, c.height);
 
-  ctx.font="12px Arial";
-  let scale=Math.min((c.width-80)/bw,(c.height-150)/bh);
+  ctx.font="14px Arial";
+  let scale=Math.min((c.width-60)/bw,(c.height-100)/bh);
 
   let sheets=[];
   let remaining=qty;
@@ -123,66 +183,63 @@ function draw(){
       if(remaining<=0) break;
     }
     sheets.push(sheet);
+    if(sheets.length > 10) break; // Límite para evitar bloqueos
   }
 
   document.getElementById("info").innerText="Tablas necesarias: "+sheets.length;
 
   sheets.forEach((sheet,i)=>{
-    let ox=40+i*(bw*scale+60);
-    let oy=50; // Mantener limpio en pantalla, sin logo
+    // En móvil dibujamos uno debajo de otro si son muchos, o uno solo principal
+    let ox=40;
+    let oy=50; 
 
     ctx.strokeStyle="blue";
+    ctx.lineWidth = 2;
     ctx.strokeRect(ox,oy,bw*scale,bh*scale);
+    
     ctx.fillStyle="blue";
-    ctx.fillText(bw/unit,ox+bw*scale/2,oy-10);
-    ctx.fillText(bh/unit,ox-30,oy+bh*scale/2);
+    ctx.fillText(v("bw"),ox+bw*scale/2,oy-10);
+    ctx.fillText(v("bh"),ox-35,oy+bh*scale/2);
 
     ctx.strokeStyle="green";
     ctx.fillStyle="green";
+    ctx.lineWidth = 1;
 
     sheet.forEach(p=>{
       let x=ox+p.x*scale;
       let y=oy+p.y*scale;
       ctx.strokeRect(x,y,cw*scale,ch*scale);
-      ctx.fillText(cw/unit,x+cw*scale/2-10,y+ch*scale+12);
-      ctx.fillText(ch/unit,x+cw*scale+4,y+ch*scale/2);
     });
   });
 
-  // Guardamos lo dibujado (sin logo)
   lastDrawData = c.toDataURL();
 }
 
 function download(){
   if(!lastDrawData){
-    alert("Primero haz clic en Calcular para dibujar.");
+    alert("Primero haz clic en Calcular.");
     return;
   }
 
   const c=document.getElementById("cv");
   const ctx=c.getContext("2d");
+  const logo = document.getElementById("logoImg");
 
-  const imgData = new Image();
-  imgData.onload = function(){
-    // Fondo blanco
-    ctx.fillStyle="white";
-    ctx.fillRect(0,0,c.width,c.height);
+  // Redibujar para descarga con logo
+  const finalCanvas = document.createElement("canvas");
+  finalCanvas.width = c.width;
+  finalCanvas.height = c.height;
+  const fCtx = finalCanvas.getContext("2d");
 
-    // Logo arriba a la izquierda
-    const logo = document.getElementById("logoImg");
-    ctx.drawImage(logo, 10, 10, 150, 50);
+  fCtx.fillStyle="white";
+  fCtx.fillRect(0,0,c.width,c.height);
+  fCtx.drawImage(logo, 10, 10, 120, 40);
+  fCtx.drawImage(c, 0, 0);
 
-    // Cortes y medidas dibujados, desplazados un poco hacia abajo
-    const offsetY = 70; // Dejamos espacio para el logo
-    ctx.drawImage(imgData, 0, offsetY);
-
-    // Descargar
-    const a=document.createElement("a");
-    a.download="plano_corte.png";
-    a.href=c.toDataURL("image/png");
-    a.click();
-  }
-  imgData.src = lastDrawData;
+  const a=document.createElement("a");
+  a.download="corte_celular.png";
+  a.href=finalCanvas.toDataURL("image/png");
+  a.click();
 }
 </script>
 
