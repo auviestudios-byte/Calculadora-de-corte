@@ -1,102 +1,84 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Optimizador de Corte</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            color: #333;
-            padding: 10px;
-            margin: 0;
-        }
-        .logo-container {
-            text-align: center;
-            margin-bottom: 15px;
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        .logo-container img {
-            max-width: 180px; /* Reducido para móvil */
-            height: auto;
-        }
-        .section {
-            background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        b { display: block; margin-bottom: 8px; color: #555; }
-        
-        /* Ajuste de inputs para que no se amontonen */
-        .input-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        label {
-            flex: 0 0 80px; /* Ancho fijo para etiquetas */
-            font-size: 14px;
-        }
-        input, select {
-            flex: 1; /* El input toma el resto del espacio */
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px; /* Evita el zoom automático en iPhone */
-        }
-        
-        .buttons {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        button {
-            flex: 1;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .btn-calc { background: #4CAF50; color: white; }
-        .btn-down { background: #2196F3; color: white; }
-        
-        #info {
-            font-weight: bold;
-            margin: 10px 0;
-            text-align: center;
-        }
-        
-        /* Canvas responsivo */
-        .canvas-container {
-            width: 100%;
-            overflow-x: auto; /* Permite scroll horizontal si el dibujo es grande */
-            background: white;
-            border-radius: 8px;
-        }
-        canvas {
-            border: 1px solid #000;
-            display: block;
-            margin: 0 auto;
-            max-width: 100%; /* No se sale de la pantalla */
-            height: auto;   /* Mantiene proporción */
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Corte - Renacer Deco</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f4f4;
+    margin:0;
+    padding:10px;
+}
+.logo-container{
+    background:white;
+    text-align:center;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:10px;
+}
+.logo-container img{max-width:180px;}
+.subtitle{font-size:14px;font-weight:bold;margin-top:6px;}
+
+.section{
+    background:white;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:10px;
+}
+.input-group{
+    display:flex;
+    align-items:center;
+    margin-bottom:8px;
+}
+label{width:90px;font-size:14px;}
+input,select{flex:1;padding:8px;font-size:16px;}
+
+.buttons{
+    display:flex;
+    gap:10px;
+    margin:10px 0;
+}
+button{
+    flex:1;
+    padding:12px;
+    font-size:16px;
+    font-weight:bold;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+.btn-calc{background:#4CAF50;color:white;}
+.btn-down{background:#2196F3;color:white;}
+
+#info{text-align:center;font-weight:bold;margin-bottom:10px;}
+
+.canvas-container{
+    background:white;
+    border-radius:8px;
+    padding:5px;
+    overflow-x:auto;
+}
+canvas{
+    border:1px solid #000;
+    max-width:100%;
+    height:auto;
+    display:block;
+    margin:0 auto;
+}
+</style>
 </head>
+
 <body>
 
 <div class="logo-container">
-    <img id="logoImg" src="https://i.postimg.cc/1tyVJjwy/Logo_Blanco_violeta.png" alt="Logo" crossorigin="anonymous">
+    <img id="logoImg" src="https://i.postimg.cc/1tyVJjwy/Logo_Blanco_violeta.png" crossorigin="anonymous">
+    <div class="subtitle">Calculadora de corte para melamina</div>
 </div>
 
 <div class="section">
-    <b>Configuración</b>
     <div class="input-group">
         <label>Unidad</label>
         <select id="unit">
@@ -108,21 +90,21 @@
 </div>
 
 <div class="section">
-    <b>Tabla Base</b>
-    <div class="input-group"><label>Ancho</label><input type="number" id="bw" placeholder="0"></div>
-    <div class="input-group"><label>Alto</label><input type="number" id="bh" placeholder="0"></div>
+    <b>Tabla base</b>
+    <div class="input-group"><label>Ancho</label><input id="bw" type="number"></div>
+    <div class="input-group"><label>Alto</label><input id="bh" type="number"></div>
 </div>
 
 <div class="section">
-    <b>Piezas a Cortar</b>
-    <div class="input-group"><label>Ancho</label><input type="number" id="cw" placeholder="0"></div>
-    <div class="input-group"><label>Alto</label><input type="number" id="ch" placeholder="0"></div>
-    <div class="input-group"><label>Cantidad</label><input type="number" id="qty" placeholder="0"></div>
+    <b>Piezas a cortar</b>
+    <div class="input-group"><label>Ancho</label><input id="cw" type="number"></div>
+    <div class="input-group"><label>Alto</label><input id="ch" type="number"></div>
+    <div class="input-group"><label>Cantidad</label><input id="qty" type="number"></div>
 </div>
 
 <div class="section">
-    <b>Sierra (Disco)</b>
-    <div class="input-group"><label>Grosor mm</label><input type="number" id="kerf" value="0"></div>
+    <b>Disco / Sierra</b>
+    <div class="input-group"><label>Grosor mm</label><input id="kerf" type="number" value="0"></div>
 </div>
 
 <div class="buttons">
@@ -133,114 +115,129 @@
 <div id="info"></div>
 
 <div class="canvas-container">
-    <canvas id="cv" width="800" height="600"></canvas>
+    <canvas id="cv" width="1100" height="750"></canvas>
 </div>
 
 <script>
 function v(id){
-  let n=parseFloat(document.getElementById(id).value);
-  return isNaN(n)?0:n;
+    let n=parseFloat(document.getElementById(id).value);
+    return isNaN(n)?0:n;
 }
 
-let lastDrawData = null;
+let lastCanvas=null;
 
 function draw(){
-  let unit=parseFloat(document.getElementById("unit").value);
-  let bw=v("bw")*unit;
-  let bh=v("bh")*unit;
-  let cw=v("cw")*unit;
-  let ch=v("ch")*unit;
-  let qty=Math.floor(v("qty"));
-  let kerf=v("kerf");
+    const unit=parseFloat(unitEl.value);
+    const bw=v("bw")*unit;
+    const bh=v("bh")*unit;
+    const cw=v("cw")*unit;
+    const ch=v("ch")*unit;
+    const qty=Math.floor(v("qty"));
+    const kerf=v("kerf");
 
-  if(bw<=0||bh<=0||cw<=0||ch<=0||qty<=0){
-    alert("Por favor completa los datos");
-    return;
-  }
-
-  const c=document.getElementById("cv");
-  const ctx=c.getContext("2d");
-
-  // Ajustar tamaño del canvas internamente para mejor resolución
-  ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, c.width, c.height);
-
-  ctx.font="14px Arial";
-  let scale=Math.min((c.width-60)/bw,(c.height-100)/bh);
-
-  let sheets=[];
-  let remaining=qty;
-
-  while(remaining>0){
-    let sheet=[];
-    let x=0,y=0;
-    while(true){
-      if(x+cw>bw){ x=0; y+=ch+kerf; }
-      if(y+ch>bh) break;
-      sheet.push({x,y});
-      x+=cw+kerf;
-      remaining--;
-      if(remaining<=0) break;
+    if(bw<=0||bh<=0||cw<=0||ch<=0||qty<=0){
+        alert("Completa todos los datos");
+        return;
     }
-    sheets.push(sheet);
-    if(sheets.length > 10) break; // Límite para evitar bloqueos
-  }
 
-  document.getElementById("info").innerText="Tablas necesarias: "+sheets.length;
+    const c=cv;
+    const ctx=c.getContext("2d");
 
-  sheets.forEach((sheet,i)=>{
-    // En móvil dibujamos uno debajo de otro si son muchos, o uno solo principal
-    let ox=40;
-    let oy=50; 
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.fillStyle="white";
+    ctx.fillRect(0,0,c.width,c.height);
 
+    // MÁRGENES (dejan espacio al logo)
+    const marginX=140;
+    const marginY=140;
+
+    const scale=Math.min(
+        (c.width-marginX*2)/bw,
+        (c.height-marginY*2)/bh
+    );
+
+    const ox=marginX;
+    const oy=marginY;
+
+    // TABLERO
     ctx.strokeStyle="blue";
-    ctx.lineWidth = 2;
+    ctx.lineWidth=2;
     ctx.strokeRect(ox,oy,bw*scale,bh*scale);
-    
-    ctx.fillStyle="blue";
-    ctx.fillText(v("bw"),ox+bw*scale/2,oy-10);
-    ctx.fillText(v("bh"),ox-35,oy+bh*scale/2);
 
+    ctx.fillStyle="blue";
+    ctx.font="15px Arial";
+    ctx.fillText(`Tablero ${v("bw")} x ${v("bh")}`,ox,oy-25);
+
+    // PIEZAS
+    let x=0,y=0,rest=qty;
     ctx.strokeStyle="green";
     ctx.fillStyle="green";
-    ctx.lineWidth = 1;
+    ctx.lineWidth=1;
+    ctx.font="12px Arial";
 
-    sheet.forEach(p=>{
-      let x=ox+p.x*scale;
-      let y=oy+p.y*scale;
-      ctx.strokeRect(x,y,cw*scale,ch*scale);
-    });
-  });
+    while(rest>0){
+        if(x+cw>bw){x=0;y+=ch+kerf;}
+        if(y+ch>bh)break;
 
-  lastDrawData = c.toDataURL();
+        const dx=ox+x*scale;
+        const dy=oy+y*scale;
+        const pw=cw*scale;
+        const ph=ch*scale;
+
+        ctx.strokeRect(dx,dy,pw,ph);
+
+        // ancho
+        ctx.fillText(v("cw"),dx+pw/2-8,dy+ph+14);
+
+        // alto
+        ctx.save();
+        ctx.translate(dx-10,dy+ph/2+8);
+        ctx.rotate(-Math.PI/2);
+        ctx.fillText(v("ch"),0,0);
+        ctx.restore();
+
+        x+=cw+kerf;
+        rest--;
+    }
+
+    info.innerText="Cálculo listo para impresión";
+    lastCanvas=c;
 }
 
 function download(){
-  if(!lastDrawData){
-    alert("Primero haz clic en Calcular.");
-    return;
-  }
+    if(!lastCanvas){
+        alert("Primero calcula");
+        return;
+    }
 
-  const c=document.getElementById("cv");
-  const ctx=c.getContext("2d");
-  const logo = document.getElementById("logoImg");
+    const logo=document.getElementById("logoImg");
 
-  // Redibujar para descarga con logo
-  const finalCanvas = document.createElement("canvas");
-  finalCanvas.width = c.width;
-  finalCanvas.height = c.height;
-  const fCtx = finalCanvas.getContext("2d");
+    if(!logo.complete){
+        logo.onload=download;
+        return;
+    }
 
-  fCtx.fillStyle="white";
-  fCtx.fillRect(0,0,c.width,c.height);
-  fCtx.drawImage(logo, 10, 10, 120, 40);
-  fCtx.drawImage(c, 0, 0);
+    const f=document.createElement("canvas");
+    f.width=lastCanvas.width;
+    f.height=lastCanvas.height;
+    const ctx=f.getContext("2d");
 
-  const a=document.createElement("a");
-  a.download="corte_celular.png";
-  a.href=finalCanvas.toDataURL("image/png");
-  a.click();
+    ctx.fillStyle="white";
+    ctx.fillRect(0,0,f.width,f.height);
+
+    // 1️⃣ DIBUJA EL PLANO
+    ctx.drawImage(lastCanvas,0,0);
+
+    // 2️⃣ DIBUJA EL LOGO ARRIBA (NO SE TAPA)
+    ctx.drawImage(logo,20,20,160,55);
+
+    const a=document.createElement("a");
+    a.download="corte_melamina.png";
+    a.href=f.toDataURL("image/png");
+    a.click();
 }
+
+const unitEl=document.getElementById("unit");
 </script>
 
 </body>
