@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Optimizador de Corte</title>
+<style>
+body{
+  font-family: Arial;
+  background:white;
+  color:black;
+  padding:20px;
+}
+.logo-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.logo-container img {
+  max-width: 250px;
+  height: auto;
+}
+.section {
+  margin-bottom:12px;
+}
+label{
+  display:inline-block;
+  width:90px;
+}
+input, select, button{
+  padding:6px;
+  margin:4px;
+}
+canvas{
+  border:1px solid black;
+  margin-top:20px;
+  background-color: white;
+}
+</style>
+</head>
+<body>
+
+<div class="logo-container">
+    <a href="https://postimg.cc/f3gbb58P" target="_blank">
+        <img id="logoImg" src="https://i.postimg.cc/1tyVJjwy/Logo_Blanco_violeta.png" alt="Logo_Blanco_violeta" crossorigin="anonymous">
+    </a>
+</div>
+
+<div class="section">
+<b>Unidad</b>
+<select id="unit">
+<option value="1">mm</option>
+<option value="10">cm</option>
+<option value="1000">m</option>
+</select>
+</div>
+
+<div class="section">
+<b>Tabla</b><br>
+<label>Ancho</label><input id="bw">
+<label>Alto</label><input id="bh">
+</div>
+
+<div class="section">
+<b>Cortes</b><br>
+<label>Ancho</label><input id="cw">
+<label>Alto</label><input id="ch">
+<label>Cantidad</label><input id="qty">
+</div>
+
+<div class="section">
+<b>Disco</b><br>
+<label>Grosor (mm)</label><input id="kerf">
+</div>
+
+<button onclick="draw()">Calcular</button>
+<button onclick="download()">Descargar</button>
+
+<div id="info"></div>
+<canvas id="cv" width="1400" height="600"></canvas>
+
+<script>
+function v(id){
+  let n=parseFloat(document.getElementById(id).value);
+  return isNaN(n)?0:n;
+}
+
+let lastDrawData = null;
+
+function draw(){
+  let unit=parseFloat(document.getElementById("unit").value);
+  let bw=v("bw")*unit;
+  let bh=v("bh")*unit;
+  let cw=v("cw")*unit;
+  let ch=v("ch")*unit;
+  let qty=Math.floor(v("qty"));
+  let kerf=v("kerf");
+
+  if(bw<=0||bh<=0||cw<=0||ch<=0||qty<=0){
+    alert("Faltan datos");
+    return;
+  }
+
+  const c=document.getElementById("cv");
+  const ctx=c.getContext("2d");
+
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, c.width, c.height);
+
+  ctx.font="12px Arial";
+  let scale=Math.min((c.width-80)/bw,(c.height-150)/bh);
+
+  let sheets=[];
+  let remaining=qty;
+
+  while(remaining>0){
+    let sheet=[];
+    let x=0,y=0;
+    while(true){
+      if(x+cw>bw){ x=0; y+=ch+kerf; }
+      if(y+ch>bh) break;
+      sheet.push({x,y});
+      x+=cw+kerf;
+      remaining--;
+      if(remaining<=0) break;
+    }
+    sheets.push(sheet);
+  }
+
+  document.getElementById("info").innerText="Tablas necesarias: "+sheets.length;
+
+  sheets.forEach((sheet,i)=>{
+    let ox=40+i*(bw*scale+60);
+    let oy=50; // Mantener limpio en pantalla, sin logo
+
+    ctx.strokeStyle="blue";
+    ctx.strokeRect(ox,oy,bw*scale,bh*scale);
+    ctx.fillStyle="blue";
+    ctx.fillText(bw/unit,ox+bw*scale/2,oy-10);
+    ctx.fillText(bh/unit,ox-30,oy+bh*scale/2);
+
+    ctx.strokeStyle="green";
+    ctx.fillStyle="green";
+
+    sheet.forEach(p=>{
+      let x=ox+p.x*scale;
+      let y=oy+p.y*scale;
+      ctx.strokeRect(x,y,cw*scale,ch*scale);
+      ctx.fillText(cw/unit,x+cw*scale/2-10,y+ch*scale+12);
+      ctx.fillText(ch/unit,x+cw*scale+4,y+ch*scale/2);
+    });
+  });
+
+  // Guardamos lo dibujado (sin logo)
+  lastDrawData = c.toDataURL();
+}
+
+function download(){
+  if(!lastDrawData){
+    alert("Primero haz clic en Calcular para dibujar.");
+    return;
+  }
+
+  const c=document.getElementById("cv");
+  const ctx=c.getContext("2d");
+
+  const imgData = new Image();
+  imgData.onload = function(){
+    // Fondo blanco
+    ctx.fillStyle="white";
+    ctx.fillRect(0,0,c.width,c.height);
+
+    // Logo arriba a la izquierda
+    const logo = document.getElementById("logoImg");
+    ctx.drawImage(logo, 10, 10, 150, 50);
+
+    // Cortes y medidas dibujados, desplazados un poco hacia abajo
+    const offsetY = 70; // Dejamos espacio para el logo
+    ctx.drawImage(imgData, 0, offsetY);
+
+    // Descargar
+    const a=document.createElement("a");
+    a.download="plano_corte.png";
+    a.href=c.toDataURL("image/png");
+    a.click();
+  }
+  imgData.src = lastDrawData;
+}
+</script>
+
+</body>
+</html>
