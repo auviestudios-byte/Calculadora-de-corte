@@ -97,9 +97,14 @@ canvas{
 
 <div class="section">
     <b>Piezas a cortar</b>
-    <div class="input-group"><label>Ancho</label><input id="cw" type="number"></div>
-    <div class="input-group"><label>Alto</label><input id="ch" type="number"></div>
-    <div class="input-group"><label>Cantidad</label><input id="qty" type="number"></div>
+    <div id="items">
+        <div class="item">
+            <div class="input-group"><label>Ancho</label><input class="cw" type="number"></div>
+            <div class="input-group"><label>Alto</label><input class="ch" type="number"></div>
+            <div class="input-group"><label>Cantidad</label><input class="qty" type="number"></div>
+        </div>
+    </div>
+    <button onclick="addItem()">+</button>
 </div>
 
 <div class="section">
@@ -119,35 +124,42 @@ canvas{
 </div>
 
 <script>
-function v(id){
-    let n=parseFloat(document.getElementById(id).value);
+function vEl(el){
+    let n=parseFloat(el.value);
     return isNaN(n)?0:n;
+}
+
+function addItem(){
+    const base=document.querySelector(".item");
+    const clone=base.cloneNode(true);
+    clone.querySelectorAll("input").forEach(i=>i.value="");
+    document.getElementById("items").appendChild(clone);
 }
 
 let lastCanvas=null;
 
 function draw(){
     const unit=parseFloat(unitEl.value);
-    const bw=v("bw")*unit;
-    const bh=v("bh")*unit;
-    const cw=v("cw")*unit;
-    const ch=v("ch")*unit;
-    const qty=Math.floor(v("qty"));
-    const kerf=v("kerf");
+    const bw=vEl(bwEl)*unit;
+    const bh=vEl(bhEl)*unit;
+    const kerf=vEl(kerfEl);
 
-    if(bw<=0||bh<=0||cw<=0||ch<=0||qty<=0){
-        alert("Completa todos los datos");
-        return;
-    }
+    const items=[...document.querySelectorAll(".item")].map(it=>{
+        return {
+            w:vEl(it.querySelector(".cw"))*unit,
+            h:vEl(it.querySelector(".ch"))*unit,
+            q:Math.floor(vEl(it.querySelector(".qty"))),
+            lw:vEl(it.querySelector(".cw")),
+            lh:vEl(it.querySelector(".ch"))
+        };
+    });
 
     const c=cv;
     const ctx=c.getContext("2d");
-
     ctx.clearRect(0,0,c.width,c.height);
     ctx.fillStyle="white";
     ctx.fillRect(0,0,c.width,c.height);
 
-    // MÁRGENES (dejan espacio al logo)
     const marginX=140;
     const marginY=140;
 
@@ -159,78 +171,60 @@ function draw(){
     const ox=marginX;
     const oy=marginY;
 
-    // TABLERO
     ctx.strokeStyle="blue";
     ctx.lineWidth=2;
     ctx.strokeRect(ox,oy,bw*scale,bh*scale);
 
     ctx.fillStyle="blue";
     ctx.font="15px Arial";
-    ctx.fillText(`Tablero ${v("bw")} x ${v("bh")}`,ox,oy-25);
+    ctx.fillText(`Tablero ${bw/unit} x ${bh/unit}`,ox,oy-25);
 
-    // PIEZAS
-    let x=0,y=0,rest=qty;
+    let x=0,y=0;
     ctx.strokeStyle="green";
     ctx.fillStyle="green";
-    ctx.lineWidth=1;
     ctx.font="12px Arial";
 
-    while(rest>0){
-        if(x+cw>bw){x=0;y+=ch+kerf;}
-        if(y+ch>bh)break;
+    items.forEach(item=>{
+        let rest=item.q;
+        while(rest>0){
+            if(x+item.w>bw){x=0;y+=item.h+kerf;}
+            if(y+item.h>bh)break;
 
-        const dx=ox+x*scale;
-        const dy=oy+y*scale;
-        const pw=cw*scale;
-        const ph=ch*scale;
+            const dx=ox+x*scale;
+            const dy=oy+y*scale;
+            const pw=item.w*scale;
+            const ph=item.h*scale;
 
-        ctx.strokeRect(dx,dy,pw,ph);
+            ctx.strokeRect(dx,dy,pw,ph);
+            ctx.fillText(item.lw,dx+pw/2-8,dy+ph+14);
 
-        // ancho
-        ctx.fillText(v("cw"),dx+pw/2-8,dy+ph+14);
+            ctx.save();
+            ctx.translate(dx-10,dy+ph/2+8);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText(item.lh,0,0);
+            ctx.restore();
 
-        // alto
-        ctx.save();
-        ctx.translate(dx-10,dy+ph/2+8);
-        ctx.rotate(-Math.PI/2);
-        ctx.fillText(v("ch"),0,0);
-        ctx.restore();
-
-        x+=cw+kerf;
-        rest--;
-    }
+            x+=item.w+kerf;
+            rest--;
+        }
+    });
 
     info.innerText="Cálculo listo para impresión";
     lastCanvas=c;
 }
 
 function download(){
-    if(!lastCanvas){
-        alert("Primero calcula");
-        return;
-    }
-
-    const logo=document.getElementById("logoImg");
-
-    if(!logo.complete){
-        logo.onload=download;
-        return;
-    }
-
+    if(!lastCanvas)return;
+    const logo=logoImg;
+    if(!logo.complete){logo.onload=download;return;}
     const f=document.createElement("canvas");
     f.width=lastCanvas.width;
     f.height=lastCanvas.height;
     const ctx=f.getContext("2d");
-
     ctx.fillStyle="white";
     ctx.fillRect(0,0,f.width,f.height);
-
-    // 1️⃣ DIBUJA EL PLANO
     ctx.drawImage(lastCanvas,0,0);
-
-    // 2️⃣ DIBUJA EL LOGO ARRIBA (NO SE TAPA)
     ctx.drawImage(logo,20,20,160,55);
-
     const a=document.createElement("a");
     a.download="corte_melamina.png";
     a.href=f.toDataURL("image/png");
@@ -238,6 +232,9 @@ function download(){
 }
 
 const unitEl=document.getElementById("unit");
+const bwEl=document.getElementById("bw");
+const bhEl=document.getElementById("bh");
+const kerfEl=document.getElementById("kerf");
 </script>
 
 </body>
