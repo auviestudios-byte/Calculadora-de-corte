@@ -1,82 +1,52 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora de Corte - Renacer Deco</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Corte - Renacer Deco</title>
+    <style>
+        body{ font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:10px; }
+        .logo-container{ background:white; text-align:center; padding:10px; border-radius:8px; margin-bottom:10px; }
+        .logo-container img{ max-width:180px; }
+        .subtitle{ font-size:14px; font-weight:bold; margin-top:6px; }
+        .section{ background:white; padding:12px; border-radius:8px; margin-bottom:10px; }
+        .input-group{ display:flex; align-items:center; margin-bottom:8px; }
+        label{ width:90px; font-size:14px; }
+        input, select{ flex:1; padding:8px; font-size:16px; border: 1px solid #ccc; border-radius: 4px; }
+        
+        .item { 
+            background: #fafafa; 
+            border: 1px solid #eee; 
+            padding: 10px; 
+            border-radius: 5px; 
+            margin-bottom: 10px; 
+            position: relative;
+        }
+        .item-header { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #666; }
 
-<style>
-body{
-    font-family: Arial, sans-serif;
-    background:#f4f4f4;
-    margin:0;
-    padding:10px;
-}
-.logo-container{
-    background:white;
-    text-align:center;
-    padding:10px;
-    border-radius:8px;
-    margin-bottom:10px;
-}
-.logo-container img{max-width:180px;}
-.subtitle{font-size:14px;font-weight:bold;margin-top:6px;}
-
-.section{
-    background:white;
-    padding:12px;
-    border-radius:8px;
-    margin-bottom:10px;
-}
-.input-group{
-    display:flex;
-    align-items:center;
-    margin-bottom:8px;
-}
-label{width:90px;font-size:14px;}
-input,select{flex:1;padding:8px;font-size:16px;}
-
-.buttons{
-    display:flex;
-    gap:10px;
-    margin:10px 0;
-}
-button{
-    flex:1;
-    padding:12px;
-    font-size:16px;
-    font-weight:bold;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-}
-.btn-calc{background:#4CAF50;color:white;}
-.btn-down{background:#2196F3;color:white;}
-
-#info{text-align:center;font-weight:bold;margin-bottom:10px;}
-
-.canvas-container{
-    background:white;
-    border-radius:8px;
-    padding:5px;
-    overflow-x:auto;
-}
-canvas{
-    border:1px solid #000;
-    max-width:100%;
-    height:auto;
-    display:block;
-    margin:0 auto;
-}
-</style>
+        .buttons{ display:flex; gap:10px; margin:10px 0; }
+        button{ flex:1; padding:12px; font-size:16px; font-weight:bold; border:none; border-radius:6px; cursor:pointer; }
+        .btn-calc{ background:#4CAF50; color:white; }
+        .btn-down{ background:#2196F3; color:white; }
+        .btn-add{ background:#673AB7; color:white; width: 100%; margin-top: 5px; }
+        
+        #info { 
+            background: #e3f2fd; padding: 15px; border-radius: 8px; 
+            text-align: center; font-weight: bold; margin-bottom: 10px; color: #1565c0;
+            font-size: 18px; border: 2px solid #2196F3;
+        }
+        .canvas-container{ background:white; border-radius:8px; padding:10px; overflow-x:auto; }
+        canvas{ border:1px solid #000; max-width:100%; height:auto; display:block; margin:0 auto; }
+    </style>
 </head>
-
 <body>
 
 <div class="logo-container">
     <img id="logoImg" src="https://i.postimg.cc/1tyVJjwy/Logo_Blanco_violeta.png" crossorigin="anonymous">
     <div class="subtitle">Calculadora de corte para melamina</div>
 </div>
+
+<div id="info">Introduce las medidas y presiona Calcular</div>
 
 <div class="section">
     <div class="input-group">
@@ -90,152 +60,169 @@ canvas{
 </div>
 
 <div class="section">
-    <b>Tabla base</b>
-    <div class="input-group"><label>Ancho</label><input id="bw" type="number"></div>
-    <div class="input-group"><label>Alto</label><input id="bh" type="number"></div>
+    <b>1. Medida de la Placa Grande</b>
+    <div class="input-group"><label>Ancho</label><input id="bw" type="number" placeholder="Ej: 260"></div>
+    <div class="input-group"><label>Alto</label><input id="bh" type="number" placeholder="Ej: 183"></div>
 </div>
 
 <div class="section">
-    <b>Piezas a cortar</b>
-    <div id="items">
+    <b>2. Piezas a Cortar (Diferentes tamaños)</b>
+    <div id="itemsContainer">
         <div class="item">
+            <div class="item-header">Grupo de piezas 1</div>
             <div class="input-group"><label>Ancho</label><input class="cw" type="number"></div>
             <div class="input-group"><label>Alto</label><input class="ch" type="number"></div>
             <div class="input-group"><label>Cantidad</label><input class="qty" type="number"></div>
         </div>
     </div>
-    <button onclick="addItem()">+</button>
+    <button class="btn-add" onclick="addNewItemRow()">+ Añadir otro tamaño de pieza</button>
 </div>
 
 <div class="section">
-    <b>Disco / Sierra</b>
-    <div class="input-group"><label>Grosor mm</label><input id="kerf" type="number" value="0"></div>
+    <b>3. Sierra</b>
+    <div class="input-group"><label>Disco (mm)</label><input id="kerf" type="number" value="4"></div>
 </div>
 
 <div class="buttons">
-    <button class="btn-calc" onclick="draw()">Calcular</button>
+    <button class="btn-calc" onclick="calculate()">Calcular Placas</button>
     <button class="btn-down" onclick="download()">Descargar</button>
 </div>
 
-<div id="info"></div>
-
 <div class="canvas-container">
-    <canvas id="cv" width="1100" height="750"></canvas>
+    <canvas id="cv"></canvas>
 </div>
 
 <script>
-function vEl(el){
-    let n=parseFloat(el.value);
-    return isNaN(n)?0:n;
+const itemsContainer = document.getElementById("itemsContainer");
+const cv = document.getElementById("cv");
+
+function addNewItemRow(){
+    const rowCount = itemsContainer.querySelectorAll(".item").length + 1;
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
+        <div class="item-header">Grupo de piezas ${rowCount}</div>
+        <div class="input-group"><label>Ancho</label><input class="cw" type="number"></div>
+        <div class="input-group"><label>Alto</label><input class="ch" type="number"></div>
+        <div class="input-group"><label>Cantidad</label><input class="qty" type="number"></div>
+    `;
+    itemsContainer.appendChild(div);
 }
 
-function addItem(){
-    const base=document.querySelector(".item");
-    const clone=base.cloneNode(true);
-    clone.querySelectorAll("input").forEach(i=>i.value="");
-    document.getElementById("items").appendChild(clone);
-}
-
-let lastCanvas=null;
-
-function draw(){
-    const unit=parseFloat(unitEl.value);
-    const bw=vEl(bwEl)*unit;
-    const bh=vEl(bhEl)*unit;
-    const kerf=vEl(kerfEl);
-
-    const items=[...document.querySelectorAll(".item")].map(it=>{
-        return {
-            w:vEl(it.querySelector(".cw"))*unit,
-            h:vEl(it.querySelector(".ch"))*unit,
-            q:Math.floor(vEl(it.querySelector(".qty"))),
-            lw:vEl(it.querySelector(".cw")),
-            lh:vEl(it.querySelector(".ch"))
-        };
-    });
-
-    const c=cv;
-    const ctx=c.getContext("2d");
-    ctx.clearRect(0,0,c.width,c.height);
-    ctx.fillStyle="white";
-    ctx.fillRect(0,0,c.width,c.height);
-
-    const marginX=140;
-    const marginY=140;
-
-    const scale=Math.min(
-        (c.width-marginX*2)/bw,
-        (c.height-marginY*2)/bh
-    );
-
-    const ox=marginX;
-    const oy=marginY;
-
-    ctx.strokeStyle="blue";
-    ctx.lineWidth=2;
-    ctx.strokeRect(ox,oy,bw*scale,bh*scale);
-
-    ctx.fillStyle="blue";
-    ctx.font="15px Arial";
-    ctx.fillText(`Tablero ${bw/unit} x ${bh/unit}`,ox,oy-25);
-
-    let x=0,y=0;
-    ctx.strokeStyle="green";
-    ctx.fillStyle="green";
-    ctx.font="12px Arial";
-
-    items.forEach(item=>{
-        let rest=item.q;
-        while(rest>0){
-            if(x+item.w>bw){x=0;y+=item.h+kerf;}
-            if(y+item.h>bh)break;
-
-            const dx=ox+x*scale;
-            const dy=oy+y*scale;
-            const pw=item.w*scale;
-            const ph=item.h*scale;
-
-            ctx.strokeRect(dx,dy,pw,ph);
-            ctx.fillText(item.lw,dx+pw/2-8,dy+ph+14);
-
-            ctx.save();
-            ctx.translate(dx-10,dy+ph/2+8);
-            ctx.rotate(-Math.PI/2);
-            ctx.fillText(item.lh,0,0);
-            ctx.restore();
-
-            x+=item.w+kerf;
-            rest--;
+function calculate() {
+    const unit = parseFloat(document.getElementById("unit").value);
+    const bwVal = parseFloat(document.getElementById("bw").value);
+    const bhVal = parseFloat(document.getElementById("bh").value);
+    
+    if(!bwVal || !bhVal) return alert("Por favor ingresa las medidas de la placa base");
+    
+    const bw = bwVal * unit;
+    const bh = bhVal * unit;
+    const kerf = parseFloat(document.getElementById("kerf").value) || 0;
+    
+    let allPieces = [];
+    
+    document.querySelectorAll(".item").forEach(row => {
+        const wVal = parseFloat(row.querySelector(".cw").value);
+        const hVal = parseFloat(row.querySelector(".ch").value);
+        const qVal = parseInt(row.querySelector(".qty").value);
+        
+        if(wVal > 0 && hVal > 0 && qVal > 0) {
+            const w = wVal * unit;
+            const h = hVal * unit;
+            for(let i=0; i<qVal; i++) {
+                allPieces.push({ w, h, labelW: wVal, labelH: hVal });
+            }
         }
     });
 
-    info.innerText="Cálculo listo para impresión";
-    lastCanvas=c;
+    if(allPieces.length === 0) return alert("Agrega al menos una pieza con cantidad");
+
+    allPieces.sort((a, b) => (b.w * b.h) - (a.w * a.h));
+
+    let boards = [];
+    allPieces.forEach(p => {
+        let placed = false;
+        for(let board of boards) {
+            if(attemptPlace(board, p, bw, bh, kerf)) {
+                placed = true;
+                break;
+            }
+        }
+        if(!placed) {
+            let newBoard = { pieces: [], curX: 0, curY: 0, rowMaxH: 0 };
+            attemptPlace(newBoard, p, bw, bh, kerf);
+            boards.push(newBoard);
+        }
+    });
+
+    draw(boards, bw, bh, unit);
+    document.getElementById("info").innerHTML = `NECESITAS COMPRAR: ${boards.length} PLACA(S)`;
+}
+
+function attemptPlace(board, p, bw, bh, kerf) {
+    if (board.curX + p.w <= bw && board.curY + p.h <= bh) {
+        p.x = board.curX;
+        p.y = board.curY;
+        board.pieces.push({...p});
+        board.curX += p.w + kerf;
+        board.rowMaxH = Math.max(board.rowMaxH, p.h);
+        return true;
+    } else {
+        let nextY = board.curY + board.rowMaxH + kerf;
+        if (nextY + p.h <= bh) {
+            board.curX = 0;
+            board.curY = nextY;
+            board.rowMaxH = p.h;
+            p.x = board.curX;
+            p.y = board.curY;
+            board.pieces.push({...p});
+            board.curX += p.w + kerf;
+            return true;
+        }
+    }
+    return false;
+}
+
+function draw(boards, bw, bh, unit) {
+    const ctx = cv.getContext("2d");
+    const scale = Math.min(900 / bw, 500 / bh);
+    const boardSpacing = 80;
+
+    cv.width = (bw * scale) + 100;
+    cv.height = (bh * scale + boardSpacing) * boards.length + 50;
+
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, cv.width, cv.height);
+
+    boards.forEach((board, i) => {
+        const offY = 40 + i * (bh * scale + boardSpacing);
+        const offX = 50;
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(offX, offY, bw * scale, bh * scale);
+        ctx.fillStyle = "#000";
+        ctx.font = "bold 14px Arial";
+        ctx.fillText(`PLACA #${i+1}`, offX, offY - 10);
+
+        board.pieces.forEach(p => {
+            ctx.strokeStyle = "#4CAF50";
+            ctx.strokeRect(offX + p.x * scale, offY + p.y * scale, p.w * scale, p.h * scale);
+            ctx.fillStyle = "#4CAF50";
+            ctx.font = "9px Arial";
+            if(p.w * scale > 15) {
+                ctx.fillText(`${p.labelW}x${p.labelH}`, offX + p.x * scale + 2, offY + p.y * scale + 10);
+            }
+        });
+    });
 }
 
 function download(){
-    if(!lastCanvas)return;
-    const logo=logoImg;
-    if(!logo.complete){logo.onload=download;return;}
-    const f=document.createElement("canvas");
-    f.width=lastCanvas.width;
-    f.height=lastCanvas.height;
-    const ctx=f.getContext("2d");
-    ctx.fillStyle="white";
-    ctx.fillRect(0,0,f.width,f.height);
-    ctx.drawImage(lastCanvas,0,0);
-    ctx.drawImage(logo,20,20,160,55);
-    const a=document.createElement("a");
-    a.download="corte_melamina.png";
-    a.href=f.toDataURL("image/png");
-    a.click();
+    const link = document.createElement("a");
+    link.download = "corte-renacer.png";
+    link.href = cv.toDataURL();
+    link.click();
 }
-
-const unitEl=document.getElementById("unit");
-const bwEl=document.getElementById("bw");
-const bhEl=document.getElementById("bh");
-const kerfEl=document.getElementById("kerf");
 </script>
-
 </body>
 </html>
